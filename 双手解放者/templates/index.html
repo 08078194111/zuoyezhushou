@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Chat GPT作业帮手</title>
+
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+        }
+
+        .donate-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9;
+        }
+
+        .qr-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .qr-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-img {
+            max-width: 200px;
+            max-height: 200px;
+            margin-bottom: 0.5rem;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .donate-btn {
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .donate-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #response-container {
+            margin-top: 2rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <h1>Chat GPT作业帮手</h1>
+    <div class="container">
+        <div class="donate-section">
+            <p>本网站所有功能免费，但是此网站每处理一次作业，我都要向Chat GPT缴纳一些API的费用，所以也期待您的打赏。
+                最大生成字数1000字（省着点用） 微信：08078194111
+            </p>
+            <div class="qr-overlay" id="qr-overlay" style="display: none;"></div>
+            <div class="qr-container" id="qr-container" style="display: none;">
+            <button class="close-btn" onclick="hideDonateQR()">关闭</button>
+            <div class="qr-item">
+            <p>微信</p>
+            <img src="/static/IMG_3911.jpg" alt="微信" class="qr-img" />
+            </div>
+            <div class="qr-item">
+            <p>支付宝</p>
+            <img src="/static/IMG_3917.JPG" alt="支付宝" class="qr-img" />
+            </div>
+            </div>
+            <button id="donate-btn" class="donate-btn" onclick="showDonateQR()">打赏</button>
+            </div>
+            <div>
+            <label for="student_level">生成水平</label>
+            <select id="student_level" class="form-select">
+            <option value="excellent">优等生</option>
+            <option value="average">中等生</option>
+            <option value="poor">差等生</option>
+            </select>
+            </div>
+            <div class="mt-3">
+            </div>
+            <div class="mt-3">
+                <div class="container">
+                    <div class="mt-3 text-center">
+                        <a href="https://pearocr.com/#/" target="_blank">照片转文字工具:https://pearocr.com/#/
+
+                        </a>
+                    </div>
+            <label for="task">作业内容</label>
+            <textarea id="task" rows="4" class="form-control"></textarea>
+            </div>
+            <div class="mt-3">
+            <label for="additional_requirements">附加要求：</label>
+            <textarea id="additional_requirements" rows="4" class="form-control"></textarea>
+            </div>
+            <div class="mt-3">
+            <button id="submit-btn" class="donate-btn">Chat GPT写作业</button>
+            </div>
+            <div id="response-container"></div>
+            </div>
+            <script>
+                function showDonateQR() {
+                    const qrContainer = document.getElementById("qr-container");
+                    const qrOverlay = document.getElementById("qr-overlay");
+                    qrContainer.style.display = "block";
+                    qrOverlay.style.display = "block";
+                }
+            
+                function hideDonateQR() {
+                    const qrContainer = document.getElementById("qr-container");
+                    const qrOverlay = document.getElementById("qr-overlay");
+                    qrContainer.style.display = "none";
+                    qrOverlay.style.display = "none";
+                }
+            
+      
+            
+
+    document.getElementById("submit-btn").addEventListener("click", async () => {
+        const studentLevel = document.getElementById("student_level").value;
+        const task = document.getElementById("task").value;
+        const additionalRequirements = document.getElementById("additional_requirements").value;
+        const responseContainer = document.getElementById("response-container");
+        const submitBtn = document.getElementById("submit-btn");
+
+        if (task.trim() === "") {
+            alert("请输入任务描述。");
+            return;
+        }
+
+        submitBtn.textContent = "Chat GPT处理中，请稍后";
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch("/submit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    student_level: studentLevel,
+                    task: task,
+                    additional_requirements: additionalRequirements
+                })
+            });
+
+            const result = await response.json();
+            responseContainer.textContent = result.response;
+        } catch (error) {
+            console.error("Error:", error);
+            responseContainer.textContent = "出现错误，请重试。";
+        } finally {
+            submitBtn.textContent = "提交";
+            submitBtn.disabled = false;
+        }
+    });
+</script>
